@@ -71,9 +71,9 @@ display(df_position_pitstop)
 
 # COMMAND ----------
 
-df_position_pitstop.write.option("header", "true").csv('s3://mz-gr5069/processed/position_pitstop.csv')
+df_position_pitstop.write.option("header", "true").csv('s3://group1-gr5069/processed/position_pitstop.csv')
 
 # COMMAND ----------
 
-df_pitstops = spark.read.csv('s3://mz-gr5069/processed/position_pitstop.csv', header=True, inferSchema = True)
+df_pitstops = spark.read.csv('s3://group1-gr5069/processed/position_pitstop.csv', header=True, inferSchema = True)
 display(df_pitstops)
