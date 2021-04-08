@@ -42,6 +42,18 @@ df_results.printSchema
 
 # COMMAND ----------
 
+# change miliseconds schema type
+df_results = df_results.withColumn('milliseconds', df_results['milliseconds'].cast(IntegerType()))
+df_results.printSchema
+
+# COMMAND ----------
+
+# change rank schema type
+df_results = df_results.withColumn('rank', df_results['rank'].cast(IntegerType()))
+df_results.printSchema
+
+# COMMAND ----------
+
 # pivot table wider
 df_pitstops_wide = df_pitstops.groupBy("driverId", "raceId").pivot("stop").max("duration")
 display(df_pitstops_wide)
@@ -55,14 +67,21 @@ df_position_pitstop.count()
 
 # COMMAND ----------
 
-# remove obs where position is null
+# remove obs where position is null for df_position_pitstop
 df_position_pitstop = df_position_pitstop.filter('position IS NOT NULL')
 df_position_pitstop.count()
+
+
+# COMMAND ----------
+
+# remove obs where position is null for df_results
+df_results = df_results.filter('position IS NOT NULL')
+df_results.count()
 
 # COMMAND ----------
 
 # change null duration to 0
-df_position_pitstop = df_position_pitstop.na.fill(0)
+df_position_pitstop = df_position_pitstop.cast
 display(df_position_pitstop)
 
 # COMMAND ----------
@@ -75,5 +94,14 @@ df_position_pitstop.write.option("header", "true").csv('s3://group1-gr5069/proce
 
 # COMMAND ----------
 
+df_results.write.option("header", "true").csv('s3://group1-gr5069/processed/results.csv')
+
+# COMMAND ----------
+
 df_pitstops = spark.read.csv('s3://group1-gr5069/processed/position_pitstop.csv', header=True, inferSchema = True)
 display(df_pitstops)
+
+# COMMAND ----------
+
+df_results = spark.read.csv('s3://group1-gr5069/processed/results.csv', header=True, inferSchema = True)
+display(df_results)
