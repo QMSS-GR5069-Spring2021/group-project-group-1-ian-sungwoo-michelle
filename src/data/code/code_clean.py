@@ -26,6 +26,12 @@ display(df_results)
 
 # COMMAND ----------
 
+# load races data
+df_races = spark.read.csv('s3://columbia-gr5069-main/raw/races.csv', header=True, inferSchema = True)
+display(df_races)
+
+# COMMAND ----------
+
 # MAGIC %md #### Transform data
 
 # COMMAND ----------
@@ -74,15 +80,15 @@ df_position_pitstop.count()
 
 # COMMAND ----------
 
-# remove obs where position is null for df_results
-df_results = df_results.filter('position IS NOT NULL')
-df_results.count()
+# change null duration to 0
+df_position_pitstop = df_position_pitstop.na.fill(0)
+display(df_position_pitstop)
 
 # COMMAND ----------
 
-# change null duration to 0
-df_position_pitstop = df_position_pitstop.cast
-display(df_position_pitstop)
+#Combine df_race and df_results
+df_races_results = df_races.select('raceId','year','round','circuitId','name','date').join(df_results,on=['raceId'])
+display(df_races_results)
 
 # COMMAND ----------
 
@@ -94,7 +100,7 @@ df_position_pitstop.write.option("header", "true").csv('s3://group1-gr5069/proce
 
 # COMMAND ----------
 
-df_results.write.option("header", "true").csv('s3://group1-gr5069/processed/results.csv')
+df_races_results.write.option("header", "true").csv('s3://group1-gr5069/processed/races_results.csv')
 
 # COMMAND ----------
 
@@ -103,5 +109,5 @@ display(df_pitstops)
 
 # COMMAND ----------
 
-df_results = spark.read.csv('s3://group1-gr5069/processed/results.csv', header=True, inferSchema = True)
-display(df_results)
+df_races_results = spark.read.csv('s3://group1-gr5069/processed/races_results.csv', header=True, inferSchema = True)
+display(df_races_results)
