@@ -86,6 +86,12 @@ display(df_position_pitstop)
 
 # COMMAND ----------
 
+#change year schema type
+df_races = df_races.withColumn('year', df_races['year'].cast(IntegerType()))
+df_races.printSchema
+
+# COMMAND ----------
+
 #Combine df_race and df_results
 df_races_results = df_races.select('raceId','year','round','circuitId','name','date').join(df_results,on=['raceId'])
 display(df_races_results)
@@ -100,7 +106,7 @@ df_position_pitstop.write.option("header", "true").csv('s3://group1-gr5069/proce
 
 # COMMAND ----------
 
-df_races_results.write.option("header", "true").csv('s3://group1-gr5069/processed/races_results.csv')
+df_races_results.write.option("header", "true").csv('s3://group1-gr5069/processed/races_results.csv',mode="overwrite")
 
 # COMMAND ----------
 
