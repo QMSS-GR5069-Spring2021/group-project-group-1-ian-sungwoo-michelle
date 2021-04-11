@@ -32,6 +32,18 @@ display(df_races)
 
 # COMMAND ----------
 
+# load constructors data
+df_constructors = spark.read.csv('s3://columbia-gr5069-main/raw/constructors.csv', header=True, inferSchema = True)
+display(df_constructors)
+
+# COMMAND ----------
+
+# load drivers data
+df_drivers = spark.read.csv('s3://columbia-gr5069-main/raw/drivers.csv', header=True, inferSchema = True)
+display(df_drivers)
+
+# COMMAND ----------
+
 # MAGIC %md #### Transform data
 
 # COMMAND ----------
@@ -77,7 +89,6 @@ df_position_pitstop.count()
 df_position_pitstop = df_position_pitstop.filter('position IS NOT NULL')
 df_position_pitstop.count()
 
-
 # COMMAND ----------
 
 # change null duration to 0
@@ -98,11 +109,30 @@ display(df_races_results)
 
 # COMMAND ----------
 
+#Combine df_races_results and df_constructors
+df_constructors = df_constructors.withColumnRenamed('name','Constructor Name')
+df_races_results = df_constructors.select('constructorId','Constructor Name').join(df_races_results,on=['constructorId'])
+display(df_races_results)
+
+# COMMAND ----------
+
+#Combine df_races_results and df_drivers
+df_races_results = df_drivers.select('driverId','driverRef','dob','nationality').join(df_races_results,on='driverId')
+display(df_races_results)
+
+# COMMAND ----------
+
+# remove obs where position is null for df_position_pitstop
+df_races_results = df_races_results.filter('position IS NOT NULL')
+df_races_results.count()
+
+# COMMAND ----------
+
 # MAGIC %md #### Store data in S3
 
 # COMMAND ----------
 
-df_position_pitstop.write.option("header", "true").csv('s3://group1-gr5069/processed/position_pitstop.csv')
+df_position_pitstop.write.option("header", "true").csv('s3://group1-gr5069/processed/position_pitstop.csv',mode="overwrite")
 
 # COMMAND ----------
 
