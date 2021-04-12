@@ -5,6 +5,7 @@
 
 import boto3
 import pandas as pd
+import numpy as np
 
 # COMMAND ----------
 
@@ -13,7 +14,7 @@ s3 = boto3.client('s3')
 # COMMAND ----------
 
 bucket = "group1-gr5069"
-data = "processed/results.csv/part-00000-tid-3171662921362886721-50724c08-b406-4336-982c-b2080862b27b-28-1-c000.csv"
+data = "processed/races_results.csv/part-00000-tid-368662250573169207-9474530c-8de3-4295-8ae1-4d436993538b-146-1-c000.csv"
 
 obj_laps = s3.get_object(Bucket= bucket, Key= data) 
 df = pd.read_csv(obj_laps['Body'])
@@ -21,13 +22,23 @@ df = pd.read_csv(obj_laps['Body'])
 # COMMAND ----------
 
 display(df)
+df.count()
 
 # COMMAND ----------
 
-df = df[["raceId", "driverId", "constructorId", "grid", "position", "laps"]]
+#drop unnecessary columns
+df_orig = df
+df = df[["year", "raceId", "driverId", "driverRef", "dob", "nationality", "constructorId", "grid", "position", "laps"]]
 
 # COMMAND ----------
 
+display(df)
+df.info(verbose=True)
+
+# COMMAND ----------
+
+#save only second place finishes 
+df=df[df['position']==2]
 display(df)
 
 # COMMAND ----------
@@ -36,9 +47,16 @@ display(df)
 
 # COMMAND ----------
 
-from sklearn.model_selection import train_test_split
+#filter between test and training data
 
-X_train, X_test, y_train, y_test = train_test_split(df.drop(["position"], axis=1), df[["position"]].values.ravel(), random_state=42)
+X_train = df.drop(["driverRef"],axis=1).loc[df['year']<= 2010]
+X_test = df.drop(["driverRef"],axis=1).loc[df['year'] > 2010]
+
+y_train = df["driverRef"].loc[df['year']<= 2010]
+y_test = df["driverRef"].loc[df['year']> 2010]
+
+y_train = np.array(y_train)
+y_test = np.array(y_test)
 
 #Replace NaN values in X_test and X_train with the mean
 
@@ -48,121 +66,98 @@ X_train = X_train.fillna(X_train.mean())
 
 # COMMAND ----------
 
-# MAGIC %md #### Perform a test run
+display(X_train)
+display(X_test)
+
+# COMMAND ----------
+
+# MAGIC %md #### Preprocessing - one hot encoder
+
+# COMMAND ----------
+
+# Get list of categorical variables
+s = (X_train.dtypes == 'object')
+object_cols = list(s[s].index)
+
+print(object_cols)
+
+# COMMAND ----------
+
+# Apply one-hot encoder to each column with categorical data
+OH_encoder = OneHotEncoder(handle_unknown='ignore', sparse=False)
+
+OH_cols_train = pd.DataFrame(OH_encoder.fit_transform(X_train[object_cols]))
+OH_cols_test = pd.DataFrame(OH_encoder.transform(X_test[object_cols]))
+
+# One-hot encoding removed index; put it back
+OH_cols_train.index = X_train.index
+OH_cols_test.index = X_test.index
+
+# Remove categorical columns (will replace with one-hot encoding)
+num_X_train = X_train.drop(object_cols, axis=1)
+num_X_test = X_test.drop(object_cols, axis=1)
+
+# Add one-hot encoded columns to numerical features
+OH_X_train = pd.concat([num_X_train, OH_cols_train], axis=1)
+OH_X_test = pd.concat([num_X_test, OH_cols_test], axis=1)
+
+
+# COMMAND ----------
+
+OH_X_train.info(verbose=True)
+OH_X_test.info(verbose=True)
+
+# COMMAND ----------
+
+# MAGIC %md #### Predict second place finishes
 
 # COMMAND ----------
 
 import mlflow.sklearn
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.metrics import accuracy_score
 
-with mlflow.start_run(run_name="Basic RF Experiment") as run:
-  # Create model, train it, and create predictions
-  rf = RandomForestRegressor()
-  rf.fit(X_train, y_train)
-  predictions = rf.predict(X_test)
+
+with mlflow.start_run(run_name="Basic DT Experiment") as run:
+  
+  # Create model, train it
+  dt = DecisionTreeClassifier()
+  dt = dt.fit(OH_X_train,y_train)
+  predictions = dt.predict(OH_X_test)
   
   # Log model
-  mlflow.sklearn.log_model(rf, "random-forest-model")
+  mlflow.sklearn.log_model(dt, "decision-tree-model")
   
-  # Create metrics
-  mse = mean_squared_error(y_test, predictions)
-  print("  mse: {}".format(mse))
+  # report the model performance
+  accuracy_score(y_test, predictions)
   
-  # Log metrics
-  mlflow.log_metric("mse", mse)
-  
-  runID = run.info.run_uuid
-  experimentID = run.info.experiment_id
-  
-  print("Inside MLflow Run with run_id {} and experiment_id {}".format(runID, experimentID))
+  print("Accuracy:", accuracy_score(y_test, predictions))
 
 # COMMAND ----------
 
-# MAGIC %md #### Create function to log parameters, metrics, and other artifacts
+OH_X_test['predictions']=predictions
+display(OH_X_test)
 
 # COMMAND ----------
 
-def log_rf(experimentID, run_name, params, X_train, X_test, y_train, y_test):
-  import os
-  import matplotlib.pyplot as plt
-  import mlflow.sklearn
-  import seaborn as sns
-  from sklearn.ensemble import RandomForestRegressor
-  from sklearn.metrics import mean_squared_error, r2_score, explained_variance_score
-  import tempfile
-
-  with mlflow.start_run(experiment_id=experimentID, run_name=run_name) as run:
-     # Create model, train it, and create predictions
-    rf = RandomForestRegressor(**params)
-    rf.fit(X_train, y_train)
-    predictions = rf.predict(X_test)
-  
-    # Log model
-    mlflow.sklearn.log_model(rf, "random-forest-model")
-
-    # Log params
-    [mlflow.log_param(param, value) for param, value in params.items()]
-
-    # Create metrics
-    mse = mean_squared_error(y_test, predictions)
-    r2 = r2_score(y_test, predictions)
-    evs = explained_variance_score(y_test, predictions)  
-    
-    print("  mse: {}".format(mse))
-    print("  r2: {}".format(r2))
-    print("  evs: {}".format(evs))
- 
-    # Log metrics
-    mlflow.log_metric("mse", mse)
-    mlflow.log_metric("r2", r2)  
-    mlflow.log_metric("evs", evs)  
-    
-    # Create feature importance
-    importance = pd.DataFrame(list(zip(df.columns, rf.feature_importances_)), 
-                                columns=["Feature", "Importance"]
-                              ).sort_values("Importance", ascending=False)
-    
-    # Log importances using a temporary file
-    temp = tempfile.NamedTemporaryFile(prefix="feature-importance-", suffix=".csv")
-    temp_name = temp.name
-    try:
-      importance.to_csv(temp_name, index=False)
-      mlflow.log_artifact(temp_name, "feature-importance.csv")
-    finally:
-      temp.close() # Delete the temp file
-    
-    # Create plot
-    fig, ax = plt.subplots()
-
-    sns.residplot(predictions, y_test, lowess=True)
-    plt.xlabel("Predicted position")
-    plt.ylabel("Residual")
-    plt.title("Residual Plot")
-
-    # Log residuals using a temporary file
-    temp = tempfile.NamedTemporaryFile(prefix="residuals-", suffix=".png")
-    temp_name = temp.name
-    try:
-      fig.savefig(temp_name)
-      mlflow.log_artifact(temp_name, "residuals.png")
-    finally:
-      temp.close() # Delete the temp file
-      
-    display(fig) 
-    return run.info.run_uuid
-  
+X_test_preds = pd.merge(X_test,OH_X_test[['driverId','raceId','predictions']],on=['driverId','raceId'],how='left')
+X_test_preds = pd.merge(X_test_preds,df_orig[['raceId','driverId','driverRef']],on=['driverId','raceId'],how='left')
+display(X_test_preds)
 
 # COMMAND ----------
 
-# MAGIC %md #### First Run
+# MAGIC %md #### Save to S3
 
 # COMMAND ----------
 
-params = {
-  "n_estimators": 1000,
-  "max_depth": 10,
-  "random_state": 42
-}
+predictions_final = spark.createDataFrame(X_test_preds)
+display(predictions_final)
 
-log_rf(experimentID, "First Run", params, X_train, X_test, y_train, y_test)
+# COMMAND ----------
+
+predictions_final.write.format('jdbc').options(
+      url='jdbc:mysql://sp-gr5069.ccqalx6jsr2n.us-east-1.rds.amazonaws.com/sp_test',
+      driver='com.mysql.jdbc.Driver',
+      dbtable='second_place_preds',
+      user='admin',
+      password='VgCrEPeYKWaaIZZhoYHt').mode('overwrite').save()
