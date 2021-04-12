@@ -1,5 +1,4 @@
 # Databricks notebook source
-install.packages("ggeffects")
 library(ggeffects)
 library(MASS)
 library(caret)
@@ -20,8 +19,6 @@ sc <- spark_connect(method = "databricks")
 
 constructors <- spark_read_csv(sc, path = "s3://columbia-gr5069-main/raw/constructors.csv")
 constructors <- as.data.frame(constructors)
-constructors <- constructors %>%
-  filter()
 
 # COMMAND ----------
 
