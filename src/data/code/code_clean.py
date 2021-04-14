@@ -132,18 +132,18 @@ df_races_results.count()
 
 # COMMAND ----------
 
-df_position_pitstop.write.option("header", "true").csv('s3://group1-gr5069/processed/position_pitstop.csv',mode="overwrite")
+df_position_pitstop.write.option("header", "true").csv('s3://group1-gr5069/interim/position_pitstop.csv',mode="overwrite")
 
 # COMMAND ----------
 
-df_races_results.write.option("header", "true").csv('s3://group1-gr5069/processed/races_results.csv',mode="overwrite")
+df_races_results.write.option("header", "true").csv('s3://group1-gr5069/interim/races_results.csv',mode="overwrite")
 
 # COMMAND ----------
 
-df_pitstops = spark.read.csv('s3://group1-gr5069/processed/position_pitstop.csv', header=True, inferSchema = True)
+df_pitstops = spark.read.csv('s3://group1-gr5069/interim/position_pitstop.csv', header=True, inferSchema = True)
 display(df_pitstops)
 
 # COMMAND ----------
 
-df_races_results = spark.read.csv('s3://group1-gr5069/processed/races_results.csv', header=True, inferSchema = True)
+df_races_results = spark.read.csv('s3://group1-gr5069/interim/races_results.csv', header=True, inferSchema = True)
 display(df_races_results)
