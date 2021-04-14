@@ -2,6 +2,8 @@
 import boto3
 import pandas as pd
 import numpy as np
+import io
+import pickle
 
 # COMMAND ----------
 
@@ -96,18 +98,22 @@ OH_X_test = spark.createDataFrame(OH_X_test)
 
 # COMMAND ----------
 
-#convert numpy to pandas then to spark
+#using pickle to save numpy arrays to s3
 
-y_train = pd.DataFrame(y_train)
-y_test = pd.DataFrame(y_test)
+y_test_data=io.BytesIO()
+pickle.dump(y_test, y_test_data)
+y_test_data.seek(0)
 
-y_train = spark.createDataFrame(y_train)
-y_test = spark.createDataFrame(y_test)
+s3.upload_fileobj(y_test_data, 'group1-gr5069', 'interim/y_test_data.pkl')
+
+y_train_data=io.BytesIO()
+pickle.dump(y_train, y_train_data)
+y_train_data.seek(0)
+
+s3.upload_fileobj(y_train_data, 'group1-gr5069', 'interim/y_train_data.pkl')
+
 
 # COMMAND ----------
 
 OH_X_train.write.option("header", "true").save('s3://group1-gr5069/interim/OH_X_train.csv',mode="overwrite")
 OH_X_test.write.option("header", "true").save('s3://group1-gr5069/interim/OH_X_test.csv',mode="overwrite")
-
-y_train.write.option("header", "true").save('s3://group1-gr5069/interim/y_train.csv',mode="overwrite")
-y_test.write.option("header", "true").save('s3://group1-gr5069/interim/y_test.csv',mode="overwrite")
