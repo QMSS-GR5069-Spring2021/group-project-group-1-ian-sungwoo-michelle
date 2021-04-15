@@ -39,10 +39,10 @@ constructorStandings <- as.data.frame(constructorStandings)
 
 races <- spark_read_csv(sc, path = "s3://columbia-gr5069-main/raw/races.csv")
 races <- as.data.frame(races)
-races
 
 # COMMAND ----------
 
+# Merge & tidy up datasets
 constructorMerge <- left_join(constructors, constructorResults, by = "constructorId")
 constructorMerge <- left_join(constructorMerge, constructorStandings, by = "constructorId")
 constructorMerge <- constructorMerge %>%
