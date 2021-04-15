@@ -64,7 +64,7 @@ display(OH_X_train)
 
 # COMMAND ----------
 
-# MAGIC %md #### Predict second place drivers
+# MAGIC %md #### Predict second place drivers - basic run
 
 # COMMAND ----------
 
@@ -72,12 +72,241 @@ import mlflow.sklearn
 from sklearn.tree import DecisionTreeClassifier 
 from sklearn.metrics import accuracy_score
 
-with mlflow.start_run(run_name="Basic DT Experiment") as run:
+with mlflow.start_run(run_name="DT Experiment basic") as run:
   
   # Create model, train it
   dt = DecisionTreeClassifier()
   dt = dt.fit(OH_X_train,y_train)
   predictions = dt.predict(OH_X_test)
+  
+  # Log model
+  mlflow.sklearn.log_model(dt, "decision-tree-model")
+  
+  # Log metrics
+  runID = run.info.run_uuid
+  experimentID = run.info.experiment_id
+  
+  # report the model performance
+  accuracy_score(y_test, predictions)
+  
+  print("Inside MLflow Run with run_id {} and experiment_id {}".format(runID, experimentID))
+  print("Accuracy:", accuracy_score(y_test, predictions))
+
+# COMMAND ----------
+
+# MAGIC %md #### Run 2
+
+# COMMAND ----------
+
+import mlflow.sklearn
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.metrics import accuracy_score
+
+with mlflow.start_run(run_name="DT Experiment - no grid") as run:
+  
+  OH_X_train_temp = OH_X_train.drop('grid',1)
+  OH_X_test_temp = OH_X_test.drop('grid',1)
+  
+  # Create model, train it
+  dt = DecisionTreeClassifier()
+  dt = dt.fit(OH_X_train_temp, y_train)
+  predictions = dt.predict(OH_X_test_temp)
+  
+  # Log model
+  mlflow.sklearn.log_model(dt, "decision-tree-model")
+  
+  # report the model performance
+  accuracy_score(y_test, predictions)
+  
+  print("Accuracy:", accuracy_score(y_test, predictions))
+
+# COMMAND ----------
+
+# MAGIC %md #### Run 3
+
+# COMMAND ----------
+
+import mlflow.sklearn
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.metrics import accuracy_score
+
+with mlflow.start_run(run_name="DT Experiment - no laps") as run:
+  
+  OH_X_train_temp = OH_X_train.drop('laps',1)
+  OH_X_test_temp = OH_X_test.drop('laps',1)
+  
+  # Create model, train it
+  dt = DecisionTreeClassifier()
+  dt = dt.fit(OH_X_train_temp, y_train)
+  predictions = dt.predict(OH_X_test_temp)
+  
+  # Log model
+  mlflow.sklearn.log_model(dt, "decision-tree-model")
+  
+  # report the model performance
+  accuracy_score(y_test, predictions)
+  
+  print("Accuracy:", accuracy_score(y_test, predictions))
+
+# COMMAND ----------
+
+# MAGIC %md #### Run 4
+
+# COMMAND ----------
+
+import mlflow.sklearn
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.metrics import accuracy_score
+
+with mlflow.start_run(run_name="DT Experiment - no driverId") as run:
+  
+  OH_X_train_temp = OH_X_train.drop('driverId',1)
+  OH_X_test_temp = OH_X_test.drop('driverId',1)
+  
+  # Create model, train it
+  dt = DecisionTreeClassifier()
+  dt = dt.fit(OH_X_train_temp, y_train)
+  predictions = dt.predict(OH_X_test_temp)
+  
+  # Log model
+  mlflow.sklearn.log_model(dt, "decision-tree-model")
+  
+  # report the model performance
+  accuracy_score(y_test, predictions)
+  
+  print("Accuracy:", accuracy_score(y_test, predictions))
+
+# COMMAND ----------
+
+# MAGIC %md #### Run 5
+
+# COMMAND ----------
+
+import mlflow.sklearn
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.metrics import accuracy_score
+
+with mlflow.start_run(run_name="DT Experiment - no raceId") as run:
+  
+  OH_X_train_temp = OH_X_train.drop('raceId',1)
+  OH_X_test_temp = OH_X_test.drop('raceId',1)
+  
+  # Create model, train it
+  dt = DecisionTreeClassifier()
+  dt = dt.fit(OH_X_train_temp, y_train)
+  predictions = dt.predict(OH_X_test_temp)
+  
+  # Log model
+  mlflow.sklearn.log_model(dt, "decision-tree-model")
+  
+  # report the model performance
+  accuracy_score(y_test, predictions)
+  
+  print("Accuracy:", accuracy_score(y_test, predictions))
+
+# COMMAND ----------
+
+# MAGIC %md #### Run 6
+
+# COMMAND ----------
+
+import mlflow.sklearn
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.metrics import accuracy_score
+
+with mlflow.start_run(run_name="DT Experiment - no circuitId") as run:
+  
+  OH_X_train_temp = OH_X_train.drop('circuitId',1)
+  OH_X_test_temp = OH_X_test.drop('circuitId',1)
+  
+  # Create model, train it
+  dt = DecisionTreeClassifier()
+  dt = dt.fit(OH_X_train_temp, y_train)
+  predictions = dt.predict(OH_X_test_temp)
+  
+  # Log model
+  mlflow.sklearn.log_model(dt, "decision-tree-model")
+  
+  # report the model performance
+  accuracy_score(y_test, predictions)
+  
+  print("Accuracy:", accuracy_score(y_test, predictions))
+
+# COMMAND ----------
+
+# MAGIC %md #### Run 7
+
+# COMMAND ----------
+
+import mlflow.sklearn
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.metrics import accuracy_score
+
+with mlflow.start_run(run_name="DT Experiment - no constructorId") as run:
+  
+  OH_X_train_temp = OH_X_train.drop('constructorId',1)
+  OH_X_test_temp = OH_X_test.drop('constructorId',1)
+  
+  # Create model, train it
+  dt = DecisionTreeClassifier()
+  dt = dt.fit(OH_X_train_temp, y_train)
+  predictions = dt.predict(OH_X_test_temp)
+  
+  # Log model
+  mlflow.sklearn.log_model(dt, "decision-tree-model")
+  
+  # report the model performance
+  accuracy_score(y_test, predictions)
+  
+  print("Accuracy:", accuracy_score(y_test, predictions))
+
+# COMMAND ----------
+
+# MAGIC %md #### Run 8
+
+# COMMAND ----------
+
+import mlflow.sklearn
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.metrics import accuracy_score
+
+with mlflow.start_run(run_name="DT Experiment - no position") as run:
+  
+  OH_X_train_temp = OH_X_train.drop('position',1)
+  OH_X_test_temp = OH_X_test.drop('position',1)
+  
+  # Create model, train it
+  dt = DecisionTreeClassifier()
+  dt = dt.fit(OH_X_train_temp, y_train)
+  predictions = dt.predict(OH_X_test_temp)
+  
+  # Log model
+  mlflow.sklearn.log_model(dt, "decision-tree-model")
+  
+  # report the model performance
+  accuracy_score(y_test, predictions)
+  
+  print("Accuracy:", accuracy_score(y_test, predictions))
+
+# COMMAND ----------
+
+# MAGIC %md #### Run 9
+
+# COMMAND ----------
+
+import mlflow.sklearn
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.metrics import accuracy_score
+
+with mlflow.start_run(run_name="DT Experiment - no grid, laps, circuitId, position") as run:
+  
+  OH_X_train_temp = OH_X_train.drop(['grid', 'laps', 'circuitId', 'position'],1)
+  OH_X_test_temp = OH_X_test.drop(['grid', 'laps', 'circuitId', 'position'],1)
+  
+  # Create model, train it
+  dt = DecisionTreeClassifier()
+  dt = dt.fit(OH_X_train_temp, y_train)
+  predictions = dt.predict(OH_X_test_temp)
   
   # Log model
   mlflow.sklearn.log_model(dt, "decision-tree-model")
