@@ -2,6 +2,8 @@
 
 **Team members**: Ian Henry Lightfoot, Sungwoo Park, Michelle A. Zee
 
+#2, 3, 5
+
 ##QUESTIONS TO ANSWER
 
 The F1 dataset contains a number of features available for you to use. Construct your dataset from all available datasets, and select the features that make the most sense to use to answer the questions below.
