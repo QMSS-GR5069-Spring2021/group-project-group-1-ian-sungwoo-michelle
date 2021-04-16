@@ -28,25 +28,6 @@ summary(linearM)
 
 # COMMAND ----------
 
-# Dispplay most important variable
-importance <- varImp(linearM, scale = FALSE)
-importance <- importance[order(-importance$Overall), , drop = FALSE] %>%
-  rename(Importance = Overall)
-head(importance)
-
-# COMMAND ----------
-
-# Marginal effect shown clearer
-ggpredict(linearM, "points")
-
-# COMMAND ----------
-
-# Create prediction variable
-pred <- predict(linearM, newdata=constructorMerge)
-constructorMerge$pred <- pred
-
-# COMMAND ----------
-
 funA3 <- function(ntree, mtry, data){
   with(mlflow_start_run(nested = TRUE), {
     
@@ -93,8 +74,15 @@ funA3(100, 3, constructorMergeFac)
 
 # COMMAND ----------
 
+# Create prediction for random forest
 rf <- randomForest(wins ~ position + points + nationality, data=constructorMergeFac, ntree=50, mtry=2)
 predrf <- predict(rf, newdata=constructorMergeFac)
+
+# COMMAND ----------
+
+# Create prediction for linear model
+pred <- predict(linearM, newdata=constructorMerge)
+constructorMerge$pred <- pred
 
 # COMMAND ----------
 
@@ -102,6 +90,19 @@ predrf <- predict(rf, newdata=constructorMergeFac)
 diffrf <- mean(predrf - constructorMerge$wins)
 difflm <- mean(constructorMerge$pred - constructorMerge$wins)
 cbind(diffrf, difflm)
+
+# COMMAND ----------
+
+# Display most important variable
+importance <- varImp(linearM, scale = FALSE)
+importance <- importance[order(-importance$Overall), , drop = FALSE] %>%
+  rename(Importance = Overall)
+head(importance)
+
+# COMMAND ----------
+
+# Marginal effect shown clearer
+ggpredict(linearM, "points")
 
 # COMMAND ----------
 
