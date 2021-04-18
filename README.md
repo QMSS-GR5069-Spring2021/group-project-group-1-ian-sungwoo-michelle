@@ -14,23 +14,23 @@ The folders are organized as follows:
 
 | -- [src](/src)
 
-|     |-- [data](/src/date)            <- Code to read/munge raw data.
+|     | -- [data](/src/date)            <- Code to read/munge raw data.
 
-|     |-- [features](/src/features)        <- Code to transform/append data.
+|     | -- [features](/src/features)        <- Code to transform/append data.
 
-|     |-- [models](/src/models)          <- Code to analyze the data.
+|     | -- [models](/src/models)          <- Code to analyze the data.
 
-|     |-- [visualizations](/src/models)  <- Code to generate visualizations.
+|     | -- [visualizations](/src/models)  <- Code to generate visualizations.
 
 |
 
 | -- [reports](/reports)
 
-|     |-- [documents](/reports/documents)       <- Documents synthesizing the analysis.
+|     | -- [documents](/reports/documents)       <- Documents synthesizing the analysis.
 
-|     |-- [model tracking](/reports/model_tracking) <- MLFlow model tracking summary.
+|     | -- [model tracking](/reports/model_tracking) <- MLFlow model tracking summary.
 
-|     |-- [figures](reports/figures)         <- Images from Superset dashboard.
+|     | -- [figures](reports/figures)         <- Images from Superset dashboard.
 
 
 
