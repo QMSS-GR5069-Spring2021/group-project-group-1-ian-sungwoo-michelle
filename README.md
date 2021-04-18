@@ -4,6 +4,8 @@
 
 #2, 3, 5
 
+Report can be found [here](https://docs.google.com/document/d/1r9--d895eDUfna46R_dUtVNab29V3w1jxeD70dXCdtU/edit?usp=sharing)
+
 ##QUESTIONS TO ANSWER
 
 The F1 dataset contains a number of features available for you to use. Construct your dataset from all available datasets, and select the features that make the most sense to use to answer the questions below.
