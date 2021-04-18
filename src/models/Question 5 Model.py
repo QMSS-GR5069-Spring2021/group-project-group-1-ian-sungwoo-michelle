@@ -277,3 +277,16 @@ df['predictions'] = predictions
 # COMMAND ----------
 
 display(df)
+
+# COMMAND ----------
+
+df = spark.createDataFrame(df)
+
+# COMMAND ----------
+
+df.write.format('jdbc').options(
+      url='jdbc:mysql://maz-gr5069.ccqalx6jsr2n.us-east-1.rds.amazonaws.com/michelle_test',
+      driver='com.mysql.jdbc.Driver',
+      dbtable='project_q5_preds',
+      user='admin',
+      password='').mode('overwrite').save()
